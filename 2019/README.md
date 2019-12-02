@@ -5,6 +5,7 @@
 Intro to rust:
 * How do you iterate over the lines in stdin?
 * What's for loop syntax?
+* How do you parse an integer from a string?
 
 ## Day 2
 
