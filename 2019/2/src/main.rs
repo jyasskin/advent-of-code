@@ -1,5 +1,5 @@
 fn main() {
-    let mut input = vec![
+    let initial_memory = vec![
         1, 0, 0, 3, 1, 1, 2, 3, 1, 3, 4, 3, 1, 5, 0, 3, 2, 1, 10, 19, 1, 19, 5, 23, 1, 6, 23, 27,
         1, 27, 5, 31, 2, 31, 10, 35, 2, 35, 6, 39, 1, 39, 5, 43, 2, 43, 9, 47, 1, 47, 6, 51, 1, 13,
         51, 55, 2, 9, 55, 59, 1, 59, 13, 63, 1, 6, 63, 67, 2, 67, 10, 71, 1, 9, 71, 75, 2, 75, 6,
@@ -7,13 +7,23 @@ fn main() {
         2, 103, 6, 107, 2, 9, 107, 111, 1, 111, 5, 115, 2, 6, 115, 119, 1, 5, 119, 123, 1, 123, 2,
         127, 1, 127, 9, 0, 99, 2, 0, 14, 0,
     ];
-    input[1] = 12;
-    input[2] = 2;
-    println!("{:?}", run_intcode(input));
+    println!("Part 1: {:?}", run_with_args(initial_memory.clone(), 12, 2));
+    for noun in 0..100 {
+        for verb in 0..100 {
+            if run_with_args(initial_memory.clone(), noun, verb)[0] == 19690720 {
+                println!("{}, {}", noun, verb);
+            }
+        }
+    }
 }
 
-fn run_intcode(program: Vec<i32>) -> Vec<i32> {
-    let mut program: Vec<i32> = program.clone();
+fn run_with_args(mut memory: Vec<i32>, noun: i32, verb: i32) -> Vec<i32> {
+    memory[1] = noun;
+    memory[2] = verb;
+    return run_intcode(memory);
+}
+
+fn run_intcode(mut program: Vec<i32>) -> Vec<i32> {
     let mut position = 0;
     loop {
         match program[position] {
