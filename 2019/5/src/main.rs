@@ -15,7 +15,14 @@ fn main() {
         vec![1],
     );
     println!("Part 1: {:?}", output);
-    println!("Part 2: {}", part2(&lines));
+    let IntcodeResult { output, .. } = run_intcode(
+        lines[0]
+            .split(',')
+            .map(|s| s.parse().expect("Must be an integer"))
+            .collect(),
+        vec![5],
+    );
+    println!("Part 2: {:?}", output);
 }
 
 #[derive(Clone, Copy)]
@@ -24,6 +31,10 @@ enum Opcode {
     Mul,
     In,
     Out,
+    JumpIfTrue,
+    JumpIfFalse,
+    LessThan,
+    Equals,
     Halt,
 }
 impl Opcode {
@@ -33,6 +44,10 @@ impl Opcode {
             2 => Opcode::Mul,
             3 => Opcode::In,
             4 => Opcode::Out,
+            5 => Opcode::JumpIfTrue,
+            6 => Opcode::JumpIfFalse,
+            7 => Opcode::LessThan,
+            8 => Opcode::Equals,
             99 => Opcode::Halt,
             _ => panic!("Unexpected opcode: {}", code),
         }
@@ -43,6 +58,10 @@ impl Opcode {
             Opcode::Mul => 4,
             Opcode::In => 2,
             Opcode::Out => 2,
+            Opcode::JumpIfTrue => 3,
+            Opcode::JumpIfFalse => 3,
+            Opcode::LessThan => 4,
+            Opcode::Equals => 4,
             Opcode::Halt => 1,
         }
     }
@@ -66,6 +85,7 @@ fn run_intcode(mut program: Vec<i32>, input: Vec<i32>) -> IntcodeResult {
             modes.push(allmodes % 10);
             allmodes /= 10;
         }
+        let mut jumped = false;
         match opcode {
             Opcode::Add => {
                 modes.resize(2, 0);
@@ -105,6 +125,68 @@ fn run_intcode(mut program: Vec<i32>, input: Vec<i32>) -> IntcodeResult {
                 }
                 output.push(arg0);
             }
+            Opcode::JumpIfTrue => {
+                modes.resize(2, 0);
+                let mut arg0 = program[position + 1];
+                if modes[0] == 0 {
+                    arg0 = program[arg0 as usize];
+                }
+                let mut arg1 = program[position + 2];
+                if modes[1] == 0 {
+                    arg1 = program[arg1 as usize];
+                }
+                if arg0 != 0 {
+                    position = arg1 as usize;
+                    jumped = true;
+                }
+            }
+            Opcode::JumpIfFalse => {
+                modes.resize(2, 0);
+                let mut arg0 = program[position + 1];
+                if modes[0] == 0 {
+                    arg0 = program[arg0 as usize];
+                }
+                let mut arg1 = program[position + 2];
+                if modes[1] == 0 {
+                    arg1 = program[arg1 as usize];
+                }
+                if arg0 == 0 {
+                    position = arg1 as usize;
+                    jumped = true;
+                }
+            }
+            Opcode::LessThan => {
+                modes.resize(2, 0);
+                let mut arg0 = program[position + 1];
+                if modes[0] == 0 {
+                    arg0 = program[arg0 as usize];
+                }
+                let mut arg1 = program[position + 2];
+                if modes[1] == 0 {
+                    arg1 = program[arg1 as usize];
+                }
+                let result_pos = program[position + 3];
+                program[result_pos as usize] = 0;
+                if arg0 < arg1 {
+                    program[result_pos as usize] = 1;
+                }
+            }
+            Opcode::Equals => {
+                modes.resize(2, 0);
+                let mut arg0 = program[position + 1];
+                if modes[0] == 0 {
+                    arg0 = program[arg0 as usize];
+                }
+                let mut arg1 = program[position + 2];
+                if modes[1] == 0 {
+                    arg1 = program[arg1 as usize];
+                }
+                let result_pos = program[position + 3];
+                program[result_pos as usize] = 0;
+                if arg0 == arg1 {
+                    program[result_pos as usize] = 1;
+                }
+            }
             Opcode::Halt => {
                 return IntcodeResult {
                     tape: program,
@@ -112,12 +194,10 @@ fn run_intcode(mut program: Vec<i32>, input: Vec<i32>) -> IntcodeResult {
                 }
             }
         }
-        position += opcode.length();
+        if !jumped {
+            position += opcode.length();
+        }
     }
-}
-
-fn part2(_: &Vec<String>) -> String {
-    "".to_string()
 }
 
 #[cfg(test)]
@@ -132,6 +212,5 @@ mod tests {
                 output: vec![]
             }
         );
-        //assert_eq!(part2(&vec![]), "");
     }
 }

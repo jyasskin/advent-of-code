@@ -33,3 +33,13 @@ only have ASCII.
 
 How do you format a number into a string? Didn't find `.to_string()` while
 coding.
+
+## Day 5
+
+39 minutes, rank 479
+
+No real Rust surprises today. Turned day 2's inline integral opcodes into an
+ADT. An ADT optimizes for adding an operation but we're probably going to be
+adding more opcodes than operations, so I should refactor this into a class
+hierarchy -- a Trait in Rust. I'll also systematize the parameter reading and
+mode handling so it's not spammed out across all the opcode definitions.
