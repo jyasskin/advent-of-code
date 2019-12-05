@@ -18,3 +18,11 @@ Intro to rust:
   let the caller be more efficient...
 * The `mut` on a function parameter goes in a weird place, before the variable
   name. Oh well.
+
+## Day 2
+
+1:21
+
+Spent too much time building nice datastructures for the paths and worrying
+about how to slice a String of unicode characters when the actual strings could
+only have ASCII.
