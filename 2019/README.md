@@ -19,10 +19,17 @@ Intro to rust:
 * The `mut` on a function parameter goes in a weird place, before the variable
   name. Oh well.
 
-## Day 2
+## Day 3
 
 1:21
 
 Spent too much time building nice datastructures for the paths and worrying
 about how to slice a String of unicode characters when the actual strings could
 only have ASCII.
+
+## Day 4
+
+14 minutes
+
+How do you format a number into a string? Didn't find `.to_string()` while
+coding.
