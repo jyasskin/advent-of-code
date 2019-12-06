@@ -43,3 +43,13 @@ ADT. An ADT optimizes for adding an operation but we're probably going to be
 adding more opcodes than operations, so I should refactor this into a class
 hierarchy -- a Trait in Rust. I'll also systematize the parameter reading and
 mode handling so it's not spammed out across all the opcode definitions.
+
+## Day 6
+
+50 minutes, rank 1583
+
+Lifetimes. :(
+
+I had also been trying to avoid reading the input into a single string, which
+was premature optimization. `.split()` is still not the right way to split into
+lines, though...
