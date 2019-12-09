@@ -3,16 +3,12 @@ use std::convert::TryInto;
 
 #[derive(PartialEq, Eq, Debug)]
 pub struct IntcodeResult {
-    memory: Vec<i32>,
-    output: Vec<i32>,
+    pub memory: Vec<i32>,
+    pub output: Vec<i32>,
 }
 
-pub fn run_intcode(mut program: Vec<i32>, input: &[i32]) -> IntcodeResult {
+pub fn run_intcode(mut program: Vec<i32>, io: &mut dyn IO) -> IntcodeResult {
     let mut position = 0;
-    let mut io = IO {
-        input,
-        output: Vec::new(),
-    };
     loop {
         let opcode = Opcode::new(program[position] % 100);
         let mut allmodes = program[position] / 100;
@@ -24,32 +20,57 @@ pub fn run_intcode(mut program: Vec<i32>, input: &[i32]) -> IntcodeResult {
         modes.resize(opcode.params(), 0);
         let modes: Vec<Mode> = modes.into_iter().map(Mode::new).collect();
         let params = Box::from(&program[position + 1..position + 1 + opcode.params()]);
-        match opcode.execute(&params, &modes, &mut program, &mut io) {
+        match opcode.execute(&params, &modes, &mut program, io) {
             OpcodeResult::Continue => position += opcode.params() + 1,
             OpcodeResult::JumpTo(target) => position = target,
             OpcodeResult::Halt => {
                 return IntcodeResult {
                     memory: program,
-                    output: io.output,
+                    output: io.copy_output(),
                 }
             }
         }
     }
 }
 
-struct IO<'a> {
-    input: &'a [i32],
+pub fn run_intcode_input(program: Vec<i32>, input: &[i32]) -> IntcodeResult {
+    run_intcode(program, &mut VecIO::new(input.into()))
+}
+
+pub trait IO {
+    fn read(&mut self) -> Option<i32>;
+    fn write(&mut self, val: i32);
+    fn copy_output(&self) -> Vec<i32>;
+}
+
+pub struct VecIO {
+    input: Vec<i32>,
+    input_pos: usize,
     output: Vec<i32>,
 }
-impl<'a> IO<'a> {
+impl VecIO {
+    pub fn new(input: Vec<i32>) -> VecIO {
+        VecIO {
+            input,
+            input_pos: 0,
+            output: vec![],
+        }
+    }
+}
+impl IO for VecIO {
     fn read(&mut self) -> Option<i32> {
-        self.input.split_first().map(|(first, rest)| {
-            self.input = rest;
-            *first
-        })
+        if self.input_pos >= self.input.len() {
+            return None;
+        }
+        let result = Some(self.input[self.input_pos]);
+        self.input_pos += 1;
+        result
     }
     fn write(&mut self, val: i32) {
         self.output.push(val)
+    }
+    fn copy_output(&self) -> Vec<i32> {
+        self.output.clone()
     }
 }
 
@@ -138,7 +159,7 @@ impl Opcode {
         params: &[i32],
         modes: &[Mode],
         program: &mut [i32],
-        io: &mut IO,
+        io: &mut dyn IO,
     ) -> OpcodeResult {
         assert_eq!(self.params(), params.len());
         assert_eq!(params.len(), modes.len());
@@ -213,19 +234,19 @@ mod tests {
     #[test]
     fn examples_day2() {
         assert_eq!(
-            run_intcode(vec![1, 0, 0, 0, 99], &[]).memory,
+            run_intcode_input(vec![1, 0, 0, 0, 99], &[]).memory,
             vec![2, 0, 0, 0, 99]
         );
         assert_eq!(
-            run_intcode(vec![2, 3, 0, 3, 99], &[]).memory,
+            run_intcode_input(vec![2, 3, 0, 3, 99], &[]).memory,
             vec![2, 3, 0, 6, 99]
         );
         assert_eq!(
-            run_intcode(vec![2, 4, 4, 5, 99, 0], &[]).memory,
+            run_intcode_input(vec![2, 4, 4, 5, 99, 0], &[]).memory,
             vec![2, 4, 4, 5, 99, 9801]
         );
         assert_eq!(
-            run_intcode(vec![1, 1, 1, 4, 99, 5, 6, 0, 99], &[]).memory,
+            run_intcode_input(vec![1, 1, 1, 4, 99, 5, 6, 0, 99], &[]).memory,
             vec![30, 1, 1, 4, 2, 5, 6, 0, 99]
         );
     }
@@ -233,49 +254,49 @@ mod tests {
     #[test]
     fn examples_day5_position_eq8() {
         let program = vec![3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8];
-        assert_eq!(run_intcode(program.clone(), &[7]).output, vec![0]);
-        assert_eq!(run_intcode(program.clone(), &[8]).output, vec![1]);
-        assert_eq!(run_intcode(program.clone(), &[9]).output, vec![0]);
+        assert_eq!(run_intcode_input(program.clone(), &[7]).output, vec![0]);
+        assert_eq!(run_intcode_input(program.clone(), &[8]).output, vec![1]);
+        assert_eq!(run_intcode_input(program.clone(), &[9]).output, vec![0]);
     }
 
     #[test]
     fn examples_day5_position_lt8() {
         let program = vec![3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8];
-        assert_eq!(run_intcode(program.clone(), &[7]).output, vec![1]);
-        assert_eq!(run_intcode(program.clone(), &[8]).output, vec![0]);
-        assert_eq!(run_intcode(program.clone(), &[9]).output, vec![0]);
+        assert_eq!(run_intcode_input(program.clone(), &[7]).output, vec![1]);
+        assert_eq!(run_intcode_input(program.clone(), &[8]).output, vec![0]);
+        assert_eq!(run_intcode_input(program.clone(), &[9]).output, vec![0]);
     }
 
     #[test]
     fn examples_day5_imm_eq8() {
         let program = vec![3, 3, 1108, -1, 8, 3, 4, 3, 99];
-        assert_eq!(run_intcode(program.clone(), &[7]).output, vec![0]);
-        assert_eq!(run_intcode(program.clone(), &[8]).output, vec![1]);
-        assert_eq!(run_intcode(program.clone(), &[9]).output, vec![0]);
+        assert_eq!(run_intcode_input(program.clone(), &[7]).output, vec![0]);
+        assert_eq!(run_intcode_input(program.clone(), &[8]).output, vec![1]);
+        assert_eq!(run_intcode_input(program.clone(), &[9]).output, vec![0]);
     }
 
     #[test]
     fn examples_day5_imm_lt8() {
         let program = vec![3, 3, 1107, -1, 8, 3, 4, 3, 99];
-        assert_eq!(run_intcode(program.clone(), &[7]).output, vec![1]);
-        assert_eq!(run_intcode(program.clone(), &[8]).output, vec![0]);
-        assert_eq!(run_intcode(program.clone(), &[9]).output, vec![0]);
+        assert_eq!(run_intcode_input(program.clone(), &[7]).output, vec![1]);
+        assert_eq!(run_intcode_input(program.clone(), &[8]).output, vec![0]);
+        assert_eq!(run_intcode_input(program.clone(), &[9]).output, vec![0]);
     }
 
     #[test]
     fn examples_day5_jump_pos_nonzero() {
         let program = vec![3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9];
-        assert_eq!(run_intcode(program.clone(), &[-1]).output, vec![1]);
-        assert_eq!(run_intcode(program.clone(), &[0]).output, vec![0]);
-        assert_eq!(run_intcode(program.clone(), &[1]).output, vec![1]);
+        assert_eq!(run_intcode_input(program.clone(), &[-1]).output, vec![1]);
+        assert_eq!(run_intcode_input(program.clone(), &[0]).output, vec![0]);
+        assert_eq!(run_intcode_input(program.clone(), &[1]).output, vec![1]);
     }
 
     #[test]
     fn examples_day5_jump_imm_nonzero() {
         let program = vec![3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1];
-        assert_eq!(run_intcode(program.clone(), &[-1]).output, vec![1]);
-        assert_eq!(run_intcode(program.clone(), &[0]).output, vec![0]);
-        assert_eq!(run_intcode(program.clone(), &[1]).output, vec![1]);
+        assert_eq!(run_intcode_input(program.clone(), &[-1]).output, vec![1]);
+        assert_eq!(run_intcode_input(program.clone(), &[0]).output, vec![0]);
+        assert_eq!(run_intcode_input(program.clone(), &[1]).output, vec![1]);
     }
 
     #[test]
@@ -285,8 +306,8 @@ mod tests {
             0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46, 1101, 1000, 1, 20, 4,
             20, 1105, 1, 46, 98, 99,
         ];
-        assert_eq!(run_intcode(program.clone(), &[7]).output, vec![999]);
-        assert_eq!(run_intcode(program.clone(), &[8]).output, vec![1000]);
-        assert_eq!(run_intcode(program.clone(), &[9]).output, vec![1001]);
+        assert_eq!(run_intcode_input(program.clone(), &[7]).output, vec![999]);
+        assert_eq!(run_intcode_input(program.clone(), &[8]).output, vec![1000]);
+        assert_eq!(run_intcode_input(program.clone(), &[9]).output, vec![1001]);
     }
 }

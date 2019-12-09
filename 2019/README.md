@@ -53,3 +53,11 @@ Lifetimes. :(
 I had also been trying to avoid reading the input into a single string, which
 was premature optimization. `.split()` is still not the right way to split into
 lines, though...
+
+## Day 7
+
+Over 1.5 hours.
+
+Missed that phases were used exactly once...
+
+Threads! That took a long time.
