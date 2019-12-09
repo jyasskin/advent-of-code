@@ -67,3 +67,5 @@ Threads! That took a long time.
 38 minutes
 
 Argh, forgot to check for transparency in part 2. :-P
+
+## Day 9
