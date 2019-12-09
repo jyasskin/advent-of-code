@@ -19,6 +19,20 @@ fn main() {
         )
         .output
     );
+    println!(
+        "Part 1: {:?}",
+        run_intcode_input(
+            input
+                .split(',')
+                .map(|s| s
+                    .trim()
+                    .parse()
+                    .expect(&["Must be an integer: ", s].concat()))
+                .collect(),
+            &[2]
+        )
+        .output
+    );
 }
 
 fn input() -> String {
