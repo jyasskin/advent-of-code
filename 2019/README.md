@@ -61,3 +61,9 @@ Over 1.5 hours.
 Missed that phases were used exactly once...
 
 Threads! That took a long time.
+
+## Day 8
+
+38 minutes
+
+Argh, forgot to check for transparency in part 2. :-P

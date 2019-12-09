@@ -38,6 +38,42 @@ fn main() {
         layers.push(layer);
     }
     println!("Part 1: {}", score);
+    println!("Part 2:");
+    print_layer(&squash(layers.as_slice()));
+}
+
+fn squash(layers: &[[[u32; 25]; 6]]) -> [[u32; 25]; 6] {
+    let mut result = [[2; 25]; 6];
+    for layer in layers {
+        for row in 0..6 {
+            for col in 0..25 {
+                if result[row][col] == 2 {
+                    match layer[row][col] {
+                        0 => result[row][col] = 0,
+                        1 => result[row][col] = 1,
+                        _ => {}
+                    }
+                }
+            }
+        }
+    }
+    result
+}
+
+fn print_layer(layer: &[[u32; 25]; 6]) {
+    for row in layer {
+        for col in row {
+            print!(
+                "{}",
+                match col {
+                    0 => " ",
+                    1 => "X",
+                    _ => ".",
+                }
+            );
+        }
+        println!("")
+    }
 }
 
 #[cfg(test)]
