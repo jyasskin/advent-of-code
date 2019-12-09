@@ -69,3 +69,8 @@ Threads! That took a long time.
 Argh, forgot to check for transparency in part 2. :-P
 
 ## Day 9
+
+33 minutes, rank 564
+
+I probably spent too much time turning the relative base into a field of the
+state.
