@@ -21,14 +21,23 @@ fn main() {
         relative_base: 0,
         next_output: NextOutput::Paint,
     };
-    intcode::run_intcode(program, &mut state);
+    intcode::run_intcode(program.clone(), &mut state);
 
     println!("Part 1: {}", state.painted.len());
-    println!("Part 2: {}", "");
+
+    let mut state = State {
+        position: Point::new(0, 0),
+        heading: Direction::Up,
+        painted: [(Point::new(0, 0), WHITE)].iter().cloned().collect(),
+        relative_base: 0,
+        next_output: NextOutput::Paint,
+    };
+    intcode::run_intcode(program.clone(), &mut state);
+    println!("Part 2:\n{}", render(state.painted));
 }
 
 const BLACK: i64 = 0;
-// const WHITE: i64 = 1;
+const WHITE: i64 = 1;
 
 #[derive(Clone, Copy, Debug)]
 enum Direction {
@@ -115,6 +124,31 @@ impl intcode::State for State {
     }
 }
 
+fn render(panels: HashMap<Point, i64>) -> String {
+    let xs: Vec<isize> = panels.keys().map(|p| p.x).collect();
+    let ys: Vec<isize> = panels.keys().map(|p| p.y).collect();
+    let minx: isize = *xs.iter().min().unwrap();
+    let width = xs.iter().max().unwrap() - minx;
+    let miny: isize = *ys.iter().min().unwrap();
+    let height = ys.iter().max().unwrap() - miny;
+    let mut result = String::new();
+    for row in 0..=height {
+        let row = height - row;
+        for col in 0..=width {
+            result.push(match panels.get(&Point::new(col + minx, row + miny)) {
+                None => ' ',
+                Some(c) => match *c {
+                    BLACK => ' ',
+                    WHITE => '#',
+                    _ => panic!(),
+                },
+            });
+        }
+        result.push('\n');
+    }
+    result
+}
+
 fn input() -> String {
     let mut input = String::new();
     io::stdin()
@@ -128,7 +162,20 @@ mod tests {
     use super::*;
     #[test]
     fn examples() {
-        assert_eq!("", "");
-        assert_eq!("", "");
+        assert_eq!(
+            render(
+                [
+                    (Point::new(0, -1), 1),
+                    (Point::new(1, 0), 1),
+                    (Point::new(2, -1), 1),
+                    (Point::new(0, 1), 1),
+                    (Point::new(2, 1), 1)
+                ]
+                .iter()
+                .cloned()
+                .collect()
+            ),
+            "# #\n # \n# #\n"
+        );
     }
 }
