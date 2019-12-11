@@ -75,6 +75,9 @@ Argh, forgot to check for transparency in part 2. :-P
 I probably spent too much time turning the relative base into a field of the
 state.
 
+## Day 10
+
+Way too long
 
 ## Day 11
 

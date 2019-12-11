@@ -1,13 +1,13 @@
 use std::io;
-use std::io::BufRead;
+use std::io::Read;
 
 fn main() {
     let input = input();
 
     for _line in input.lines() {}
 
-    println!("Part 1: {}", part1(&lines));
-    println!("Part 2: {}", part2(&lines));
+    println!("Part 1: {}", part1(&input.lines().collect()));
+    println!("Part 2: {}", part2(&input.lines().collect()));
 }
 
 fn input() -> String {
@@ -18,11 +18,11 @@ fn input() -> String {
     input
 }
 
-fn part1(_: &Vec<String>) -> String {
+fn part1(_: &Vec<&str>) -> String {
     "".to_string()
 }
 
-fn part2(_: &Vec<String>) -> String {
+fn part2(_: &Vec<&str>) -> String {
     "".to_string()
 }
 
