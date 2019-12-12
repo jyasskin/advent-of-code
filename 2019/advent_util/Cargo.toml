@@ -1,5 +1,5 @@
 [package]
-name = "advent-of-code-2019-10"
+name = "advent_util"
 version = "0.1.0"
 authors = ["Jeffrey Yasskin <jyasskin@gmail.com>"]
 edition = "2018"
@@ -7,8 +7,5 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ndarray = {version="0.13.0", features = ["rayon"] }
-euclid = "0.20.6"
-num-integer = "0.1"
-advent_util = {path="../advent_util"}
+itertools = "0.8"
 num = "0.2.0"
