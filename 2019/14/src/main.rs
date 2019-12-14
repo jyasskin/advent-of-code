@@ -25,12 +25,10 @@ fn input() -> String {
 
 fn compute_ore_needed(input: &str) -> i64 {
     let reactions = parse(&input);
-    let mut excess: HashMap<String, i64> = HashMap::new();
-    compute_ore_needed_with_excess(&reactions, &mut excess, 1)
+    compute_ore_needed_for_fuel(&reactions, 1)
 }
 
-fn compute_ore_needed_for_fuel(input: &str, fuel: i64) -> i64 {
-    let reactions = parse(&input);
+fn compute_ore_needed_for_fuel(reactions: &Reactions, fuel: i64) -> i64 {
     let mut excess: HashMap<String, i64> = HashMap::new();
     compute_ore_needed_with_excess(&reactions, &mut excess, fuel)
 }
@@ -66,16 +64,22 @@ fn compute_ore_needed_with_excess(
     ore_needed
 }
 
-fn compute_fuel_for_ore(input: &str, mut ore: i64) -> i64 {
+fn compute_fuel_for_ore(input: &str, ore: i64) -> i64 {
     let reactions = parse(&input);
-    let mut excess: HashMap<String, i64> = HashMap::new();
-    for fuel in 0.. {
-        ore -= compute_ore_needed_with_excess(&reactions, &mut excess, 1);
-        if ore < 0 {
-            return fuel;
+    let mut low_fuel = 1;
+    let mut high_fuel = 2;
+    while compute_ore_needed_for_fuel(&reactions, high_fuel) < ore {
+        high_fuel *= 10;
+    }
+    while high_fuel - low_fuel > 1 {
+        let guess = (high_fuel + low_fuel) / 2;
+        if compute_ore_needed_for_fuel(&reactions, guess) < ore {
+            low_fuel = guess;
+        } else {
+            high_fuel = guess;
         }
     }
-    unreachable!();
+    low_fuel
 }
 
 // Returns the lowest number to multiple by piece_size to exceed quantity, and
@@ -226,7 +230,7 @@ mod tests {
 
     #[test]
     fn examples_part2() {
-        /*assert_eq!(
+        assert_eq!(
             compute_fuel_for_ore(
                 "157 ORE => 5 NZVS
                 165 ORE => 6 DCFZ
@@ -258,7 +262,7 @@ mod tests {
                 TRILLION
             ),
             5586022
-        );*/
+        );
         assert_eq!(
             compute_fuel_for_ore(
                 "171 ORE => 8 CNZTR
