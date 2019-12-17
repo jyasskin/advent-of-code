@@ -9,7 +9,7 @@ use std::str;
 fn main() {
     let input = input();
 
-    let program: Vec<i64> = input
+    let mut program: Vec<i64> = input
         .split(',')
         .map(|s| s.trim().parse().expect(s))
         .collect();
@@ -23,7 +23,40 @@ fn main() {
     println!("{}", scaffold);
 
     println!("Part 1: {}", part1(&scaffold));
-    println!("Part 2: {}", part2(&input.lines().collect()));
+
+    // Change to movement mode.
+    program[0] = 2;
+
+    // Total program =
+    // L,12,L,6,L,8,R,6,
+    // L,8,L,8,R,4,R,6,R,6,
+    // L,12,L,6,L,8,R,6,
+    // L,8,L,8,R,4,R,6,R,6,
+    // L,12,R,6,L,8,
+    // L,12,R,6,L,8,
+    // L,8,L,8,R,4,R,6,R,6,
+    // L,12,L,6,L,8,R,6,
+    // L,8,L,8,R,4,R,6,R,6,
+    // L,12,R,6,L,8
+
+    // A=L,12,L,6,L,8,R,6,
+    // B=L,8,L,8,R,4,R,6,R,6,
+    // C=L,12,R,6,L,8,
+    // Program=A,B,A,B,C,C,B,A,B,C
+
+    let input = "A,B,A,B,C,C,B,A,B,C
+L,12,L,6,L,8,R,6
+L,8,L,8,R,4,R,6,R,6
+L,12,R,6,L,8
+n
+";
+
+    let result = intcode::run_intcode_input(
+        program.clone(),
+        &input.chars().map(|c| c as i64).collect::<Vec<i64>>(),
+    );
+
+    println!("Part 2: {:?}", result.output);
 }
 
 fn input() -> String {
