@@ -1,5 +1,9 @@
+pub use euclid;
 use itertools::Itertools;
 pub use num::rational::Rational32;
+
+pub type Point2 = euclid::default::Point2D<i64>;
+pub type Vector2 = euclid::default::Vector2D<i64>;
 
 // Returns the in-order traversal of the Stern-Brocot tree down to the layer'th
 // layer, which does not include the 0/1 and 1/0 elements at the edges of the
