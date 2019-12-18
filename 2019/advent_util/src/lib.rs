@@ -1,9 +1,33 @@
 pub use euclid;
+pub use euclid::point2;
+pub use euclid::rect;
+pub use euclid::vec2;
 use itertools::Itertools;
 pub use num::rational::Rational32;
+use std::fs::File;
+use std::io;
+use std::io::Read;
 
+pub type Rect = euclid::default::Rect<i64>;
 pub type Point2 = euclid::default::Point2D<i64>;
 pub type Vector2 = euclid::default::Vector2D<i64>;
+
+pub fn input() -> String {
+    let mut input = String::new();
+    io::stdin()
+        .read_to_string(&mut input)
+        .expect("Couldn't read input");
+    input
+}
+
+pub fn read_file(name: &str) -> String {
+    let mut result = String::new();
+    File::open(name)
+        .unwrap()
+        .read_to_string(&mut result)
+        .unwrap();
+    result
+}
 
 // Returns the in-order traversal of the Stern-Brocot tree down to the layer'th
 // layer, which does not include the 0/1 and 1/0 elements at the edges of the

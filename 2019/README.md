@@ -92,6 +92,13 @@ angles.
 OMG, so much time trying to optimize the simulation, not realizing that each
 axis was independent and so could be simulated to it repeat point independently.
 
+## Day 13
+
+Part 1: 6:40 min; Part 2 took longer.
+
+I thought maybe I could just play the game manually, but there were a lot of
+blocks, so I had to teach the program to play for me.
+
 ## Day 17
 
 Part 1: 00:44:27 rank 1307; Part 2: 01:08:29 rank 305
