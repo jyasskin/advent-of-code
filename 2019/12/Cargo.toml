@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 euclid = "0.20"
+num = "0.2"

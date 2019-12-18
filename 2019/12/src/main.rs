@@ -1,4 +1,4 @@
-use euclid::default::*;
+use num::Integer;
 use std::cmp::Ordering;
 use std::collections::HashSet;
 use std::io;
@@ -21,40 +21,66 @@ fn main() {
     println!("Part 2: Repeated on step {}", time_to_repeat(moons))
 }
 
-fn time_to_repeat(mut moons: [Moon; 4]) -> i64 {
+fn time_to_repeat(moons: [Moon; 4]) -> i64 {
+    (0..3)
+        .map(|axis| {
+            time_to_repeat_axis(
+                axis,
+                moons.into_iter().map(|Moon(moon)| moon[axis]).collect(),
+            )
+        })
+        .fold(1, |a, b| a.lcm(&b))
+}
+
+fn time_to_repeat_axis(axis: usize, mut moons: Vec<MoonAxis>) -> i64 {
     let start = Instant::now();
-    let mut seen: HashSet<[Moon; 4]> = HashSet::new();
+    let mut seen: HashSet<Vec<MoonAxis>> = HashSet::new();
     let mut count: i64 = 0;
     seen.insert(moons.clone());
     loop {
         count += 1;
-        moons = step(moons);
+        step_axis(moons.iter_mut().collect());
         if !seen.insert(moons.clone()) {
             break;
         }
-        if (count as f64).log2() == (count as f64).log2().round() {
+        let lg2 = (count as f64).log2();
+        if lg2 == lg2.round() {
             println!("{}; {:?}", count, start.elapsed());
         }
     }
+    println!("Axis {} repeated on step {}", axis, count);
     count
 }
 
+// Represents a moon's position and velocity along one axis.
 #[derive(Default, PartialEq, Eq, Hash, Copy, Clone, Debug)]
-struct Moon {
-    pos: Point3D<i32>,
-    vel: Vector3D<i32>,
+struct MoonAxis {
+    pos: i32,
+    vel: i32,
 }
+fn axis(pos: i32, vel: i32) -> MoonAxis {
+    MoonAxis { pos, vel }
+}
+
+#[derive(Default, PartialEq, Eq, Hash, Copy, Clone, Debug)]
+struct Moon([MoonAxis; 3]);
 impl Moon {
+    fn x(&self) -> &MoonAxis {
+        &self.0[0]
+    }
+    fn y(&self) -> &MoonAxis {
+        &self.0[1]
+    }
+    fn z(&self) -> &MoonAxis {
+        &self.0[2]
+    }
     fn energy(&self) -> i32 {
-        (self.pos.x.abs() + self.pos.y.abs() + self.pos.z.abs())
-            * (self.vel.x.abs() + self.vel.y.abs() + self.vel.z.abs())
+        (self.x().pos.abs() + self.y().pos.abs() + self.z().pos.abs())
+            * (self.x().vel.abs() + self.y().vel.abs() + self.z().vel.abs())
     }
 }
 fn moon(x: i32, y: i32, z: i32, vx: i32, vy: i32, vz: i32) -> Moon {
-    Moon {
-        pos: Point3D::new(x, y, z),
-        vel: Vector3D::new(vx, vy, vz),
-    }
+    Moon([axis(x, vx), axis(y, vy), axis(z, vz)])
 }
 
 fn _input() -> String {
@@ -76,22 +102,25 @@ fn simulate_moons(mut moons: [Moon; 4], steps: i32) -> Vec<[Moon; 4]> {
 }
 
 fn step(mut moons: [Moon; 4]) -> [Moon; 4] {
-    update_velocities(&mut moons);
-    for mut moon in &mut moons {
-        update_position(&mut moon);
+    for axis in 0..3 {
+        step_axis(moons.iter_mut().map(|Moon(moon)| &mut moon[axis]).collect());
     }
     moons
 }
+fn step_axis(mut moons: Vec<&mut MoonAxis>) {
+    update_velocities(&mut moons);
+    for moon in moons {
+        update_position(moon);
+    }
+}
 
-fn update_velocities(moons: &mut [Moon]) {
+fn update_velocities(moons: &mut Vec<&mut MoonAxis>) {
     for i in 0..moons.len() {
         for j in 0..moons.len() {
             if i == j {
                 continue;
             }
-            update_velocity(moons[i].pos.x, moons[j].pos.x, &mut moons[i].vel.x);
-            update_velocity(moons[i].pos.y, moons[j].pos.y, &mut moons[i].vel.y);
-            update_velocity(moons[i].pos.z, moons[j].pos.z, &mut moons[i].vel.z);
+            update_velocity(moons[i].pos, moons[j].pos, &mut moons[i].vel);
         }
     }
 }
@@ -104,8 +133,8 @@ fn update_velocity(moon_axis: i32, other_axis: i32, v: &mut i32) {
     }
 }
 
-fn update_position(moon: &mut Moon) {
-    moon.pos += moon.vel;
+fn update_position(moon_axis: &mut MoonAxis) {
+    moon_axis.pos += moon_axis.vel;
 }
 
 #[cfg(test)]
@@ -114,10 +143,7 @@ mod tests {
     #[test]
     fn example1() {
         let moons = [
-            Moon {
-                pos: Point3D::new(-1, 0, 2),
-                vel: Vector3D::new(0, 0, 0),
-            },
+            moon(-1, 0, 2, 0, 0, 0),
             moon(2, -10, -7, 0, 0, 0),
             moon(4, -8, 8, 0, 0, 0),
             moon(3, 5, -1, 0, 0, 0),

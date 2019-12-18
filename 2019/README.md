@@ -79,6 +79,23 @@ state.
 
 Way too long
 
+I implemented a fancy way of enumerating the rationals in order, but I think I
+could have just scanned for all the existing asteroids and sort|uniq'ed their
+angles.
+
 ## Day 11
 
 1:13, rank 1478
+
+## Day 12
+
+OMG, so much time trying to optimize the simulation, not realizing that each
+axis was independent and so could be simulated to it repeat point independently.
+
+## Day 17
+
+Part 1: 00:44:27 rank 1307; Part 2: 01:08:29 rank 305
+
+The second part was just me manually writing out the instructions to hardcode
+into my program. Did other people try to have the program compute the
+instructions?
