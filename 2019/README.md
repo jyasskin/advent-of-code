@@ -106,3 +106,13 @@ Part 1: 00:44:27 rank 1307; Part 2: 01:08:29 rank 305
 The second part was just me manually writing out the instructions to hardcode
 into my program. Did other people try to have the program compute the
 instructions?
+
+## Day 19
+
+Started about 10 minutes late due to finishing part 13. Still got finished the
+whole thing at 9:36 for rank 168!
+
+This was very brute force: Try putting the ship at (1,1), if the bottom left
+corner isn't in the tractor beam, shift right by a unit. If the top right
+doesn't fit now, shift down. Repeat until they both fit. My one problem was that
+Rust's `Rect((x,y), (100,100))` has a min_x..max_x of 101 units. :-P

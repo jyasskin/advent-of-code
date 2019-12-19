@@ -1,6 +1,7 @@
 pub use euclid;
 pub use euclid::point2;
 pub use euclid::rect;
+pub use euclid::size2;
 pub use euclid::vec2;
 use itertools::Itertools;
 pub use num::rational::Rational32;
