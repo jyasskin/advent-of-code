@@ -1,0 +1,32 @@
+#result {
+    color: green;
+}
+#result::before {
+    content: "Result: ";
+}
+
+#error {
+    color: red;
+}
+
+#error p, #output p {
+    border: thin black solid;
+}
+
+body {
+    display: flex;
+    flex-direction: row;
+}
+
+main {
+    order: 1;
+}
+#right {
+    order: 2;
+}
+
+#solution {
+    font-family: monospace;
+    white-space: pre;
+    padding: 1ex;
+}
